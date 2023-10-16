@@ -6,8 +6,8 @@ import java.util.Calendar;
  * Individual fields are made available via
  * accessors such as getHour() and getMinute().
  * 
- * @author David J. Barnes and Michael Kölling.
- * @version    2016.02.29
+ * @author Omar Malik
+ * @version 2023.10.13
  */
 public class LogEntry implements Comparable<LogEntry>
 {
@@ -16,7 +16,7 @@ public class LogEntry implements Comparable<LogEntry>
     private int[] dataValues;
     // The equivalent Calendar object for the log time.
     private Calendar when;
-    
+
     // At which index in dataValues the different fields
     // from a log line are stored.
     private static final int YEAR = 0, MONTH = 1, DAY = 2,
@@ -25,10 +25,11 @@ public class LogEntry implements Comparable<LogEntry>
     // seconds or a status code, then this value must be increased
     // to match.
     private static final int NUMBER_OF_FIELDS = 5;
-                      
+
     /**
      * Decompose a log line so that the individual fields
      * are available.
+     * 
      * @param logline A single line from the log.
      *                This should be in the format:
      *                year month day hour minute etc.
@@ -39,12 +40,13 @@ public class LogEntry implements Comparable<LogEntry>
         dataValues = new int[NUMBER_OF_FIELDS];
         // Break up the log line.
         LoglineTokenizer tokenizer = new LoglineTokenizer();
-        tokenizer.tokenize(logline,dataValues);
+        tokenizer.tokenize(logline, dataValues);
         setWhen();
     }
-    
+
     /**
      * Create a LogEntry from the individual components.
+     * 
      * @param year The year
      * @param month The month (1-12)
      * @param day The day (1-31)
@@ -62,9 +64,10 @@ public class LogEntry implements Comparable<LogEntry>
         dataValues[MINUTE] = minute;
         setWhen();
     }
-    
+
     /**
      * Return the hour.
+     * 
      * @return The hour field from the log line.
      */
     public int getHour()
@@ -74,25 +77,27 @@ public class LogEntry implements Comparable<LogEntry>
 
     /**
      * Return the minute.
+     * 
      * @return The minute field from the log line.
      */
     public int getMinute()
     {
         return dataValues[MINUTE];
     }
-    
+
     /**
      * Create a string representation of the data.
      * This is not necessarily identical with the
      * text of the original log line.
+     * 
      * @return A string representing the data of this entry.
      */
     public String toString()
     {
-        StringBuffer buffer = new StringBuffer();
-        for(int value : dataValues) {
-           // Prefix a leading zero on single digit numbers.
-            if(value < 10) {
+        StringBuilder buffer = new StringBuilder();
+        for (int value : dataValues) {
+            // Prefix a leading zero on single digit numbers.
+            if (value < 10) {
                 buffer.append('0');
             }
             buffer.append(value);
@@ -101,10 +106,11 @@ public class LogEntry implements Comparable<LogEntry>
         // Drop any trailing space.
         return buffer.toString().trim();
     }
-    
+
     /**
      * Compare the date/time combination of this log entry
      * with another.
+     * 
      * @param otherEntry The other entry to compare against.
      * @return A negative value if this entry comes before the other.
      *         A positive value if this entry comes after the other.
@@ -115,9 +121,10 @@ public class LogEntry implements Comparable<LogEntry>
         // Use the equivalent Calendars comparison method.
         return when.compareTo(otherEntry.getWhen());
     }
-    
+
     /**
      * Return the Calendar object representing this event.
+     * 
      * @return The Calendar for this event.
      */
     private Calendar getWhen()
@@ -132,9 +139,29 @@ public class LogEntry implements Comparable<LogEntry>
     {
         when = Calendar.getInstance();
         // Adjust from 1-based month and day to 0-based.
-        when.set(dataValues[YEAR],
-                 dataValues[MONTH] - 1, dataValues[DAY] - 1,
+        when.set(dataValues[YEAR], dataValues[MONTH] - 1, dataValues[DAY] - 1,
                  dataValues[HOUR], dataValues[MINUTE]);
     }
-    
+}
+
+/**
+ * A simple class to tokenize a logline and extract integer values.
+ */
+class LoglineTokenizer
+{
+    /**
+     * Tokenize a logline and extract integer values.
+     * 
+     * @param logline The logline to be tokenized.
+     * @param dataValues store the integer values.
+     */
+    public void tokenize(String logline, int[] dataValues)
+    {
+        String[] tokens = logline.split(" ");
+        for (int i = 0; i < dataValues.length; i++) {
+            if (i < tokens.length) {
+                dataValues[i] = Integer.parseInt(tokens[i]);
+            }
+        }
+    }
 }
